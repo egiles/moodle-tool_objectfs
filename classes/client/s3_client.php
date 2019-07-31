@@ -89,6 +89,18 @@ class s3_client implements object_client {
         ));
     }
 
+    public function generate_signed_url($contenthash) {
+        $key = $this->get_filepath_from_hash($contenthash);
+        $command = $this->client->getCommand('GetObject', [
+            'Bucket' => $this->bucket,
+            'Key' => $key
+        ]);
+        $request = $this->client->createPresignedRequest($command, '+2 minutes');
+        $signedurl = (string)$request->getUri();
+
+        return $signedurl;
+    }
+
     public function get_availability() {
         return true;
     }

@@ -661,4 +661,18 @@ abstract class object_file_system extends \file_system_filedir {
         return copy($externalpath, $localpath);
     }
 
+    /**
+     * Generates signed URL to external file from its hash.
+     *
+     * @param string $contenthash File content hash.
+     *
+     * @return string.
+     */
+
+    public function generate_signed_url_to_external_file_from_hash($contenthash) {
+        $signedurl = $this->externalclient->generate_signed_url($contenthash);
+
+        return $signedurl;
+    }
+
 }
