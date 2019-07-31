@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Object client interface.
+ * Object client class.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -27,17 +27,34 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-interface object_client {
-    public function __construct($config);
-    public function register_stream_wrapper();
-    public function get_fullpath_from_hash($contenthash);
-    public function get_trash_fullpath_from_hash($contenthash);
-    public function delete_file($fullpath);
-    public function rename_file($currentpath, $destinationpath);
-    public function get_seekable_stream_context();
-    public function get_availability();
-    public function get_maximum_upload_size();
-    public function verify_object($contenthash, $localpath);
-    public function generate_signed_url($contenthash);
-    public function support_signed_urls();
+class object_client {
+
+    public function get_availability() {
+        return false;
+    }
+
+    public function register_stream_wrapper() {
+        return false;
+    }
+
+    /**
+     * Does the storage support pre-signed URLs.
+     *
+     * @return bool.
+     */
+    public function support_signed_urls() {
+        return false;
+    }
+
+    /**
+     * Generates pre-signed URL to storage file from its hash.
+     *
+     * @param string $contenthash File content hash.
+     *
+     * @return string.
+     */
+    public function generate_signed_url($contenthash) {
+        return 'Not supported';
+    }
+
 }

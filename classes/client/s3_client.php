@@ -30,18 +30,6 @@ defined('MOODLE_INTERNAL') || die();
 $autoloader = $CFG->dirroot . '/local/aws/sdk/aws-autoloader.php';
 
 if (!file_exists($autoloader)) {
-
-    // Stub class with bare implementation for when the SDK prerequisite does not exist.
-    class s3_client {
-        public function get_availability() {
-            return false;
-        }
-
-        public function register_stream_wrapper() {
-            return false;
-        }
-    }
-
     return;
 }
 
@@ -59,7 +47,7 @@ define('AWS_CAN_READ_OBJECT', 0);
 define('AWS_CAN_WRITE_OBJECT', 1);
 define('AWS_CAN_DELETE_OBJECT', 2);
 
-class s3_client implements object_client {
+class s3_client extends object_client {
 
     protected $client;
     protected $bucket;

@@ -30,24 +30,12 @@ defined('MOODLE_INTERNAL') || die();
 $autoloader = $CFG->dirroot . '/local/openstack/vendor/autoload.php';
 
 if (!file_exists($autoloader)) {
-
-    // Stub class with bare implementation for when the SDK prerequisite does not exist.
-    class swift_client {
-        public function get_availability() {
-            return false;
-        }
-
-        public function register_stream_wrapper() {
-            return false;
-        }
-    }
-
     return;
 }
 
 require_once($autoloader);
 
-class swift_client implements object_client {
+class swift_client extends object_client {
 
     /** @var string $containername The current container. */
     protected $containername;
@@ -369,26 +357,6 @@ class swift_client implements object_client {
     private function get_error_code($e) {
 
         return $e->getResponse()->getStatusCode();
-    }
-
-    /**
-     * Does the storage support pre-signed URLs.
-     *
-     * @return bool.
-     */
-    public function support_signed_urls() {
-        return false;
-    }
-
-    /**
-     * Generates pre-signed URL to Swift file from its hash.
-     *
-     * @param string $contenthash File content hash.
-     *
-     * @return string.
-     */
-    public function generate_signed_url($contenthash) {
-        return 'Not supported';
     }
 
 }

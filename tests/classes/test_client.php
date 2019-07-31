@@ -21,7 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 use tool_objectfs\object_file_system;
 use tool_objectfs\client\object_client;
 
-class test_client implements object_client {
+class test_client extends object_client {
 
     private $bucketpath;
 
@@ -106,12 +106,5 @@ class test_client implements object_client {
         return 5000000000;
     }
 
-    public function support_signed_urls() {
-        return false;
-    }
-
-    public function generate_signed_url($contenthash) {
-        return 'Not supported';
-    }
 }
 
