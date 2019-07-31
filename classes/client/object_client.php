@@ -38,4 +38,6 @@ interface object_client {
     public function get_availability();
     public function get_maximum_upload_size();
     public function verify_object($contenthash, $localpath);
+    public function generate_signed_url($contenthash);
+    public function support_signed_urls();
 }

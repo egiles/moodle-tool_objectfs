@@ -371,4 +371,24 @@ class swift_client implements object_client {
         return $e->getResponse()->getStatusCode();
     }
 
+    /**
+     * Does the storage support pre-signed URLs.
+     *
+     * @return bool.
+     */
+    public function support_signed_urls() {
+        return false;
+    }
+
+    /**
+     * Generates pre-signed URL to Swift file from its hash.
+     *
+     * @param string $contenthash File content hash.
+     *
+     * @return string.
+     */
+    public function generate_signed_url($contenthash) {
+        return 'Not supported';
+    }
+
 }

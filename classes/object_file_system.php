@@ -670,7 +670,12 @@ abstract class object_file_system extends \file_system_filedir {
      */
 
     public function generate_signed_url_to_external_file_from_hash($contenthash) {
-        $signedurl = $this->externalclient->generate_signed_url($contenthash);
+
+        if ($this->externalclient->support_signed_urls()) {
+            $signedurl = $this->externalclient->generate_signed_url($contenthash);
+        } else {
+            $signedurl = 'Pre-Signed URLs not supported for current storage';
+        }
 
         return $signedurl;
     }

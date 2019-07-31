@@ -105,5 +105,13 @@ class test_client implements object_client {
     public function get_maximum_upload_size() {
         return 5000000000;
     }
+
+    public function support_signed_urls() {
+        return false;
+    }
+
+    public function generate_signed_url($contenthash) {
+        return 'Not supported';
+    }
 }
 

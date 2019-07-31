@@ -89,6 +89,13 @@ class s3_client implements object_client {
         ));
     }
 
+    /**
+     * Generates pre-signed URL to S3 file from its hash.
+     *
+     * @param string $contenthash File content hash.
+     *
+     * @return string.
+     */
     public function generate_signed_url($contenthash) {
         $key = $this->get_filepath_from_hash($contenthash);
         $command = $this->client->getCommand('GetObject', [
@@ -99,6 +106,15 @@ class s3_client implements object_client {
         $signedurl = (string)$request->getUri();
 
         return $signedurl;
+    }
+
+    /**
+     * Does the storage support pre-signed URLs.
+     *
+     * @return bool.
+     */
+    public function support_signed_urls() {
+        return true;
     }
 
     public function get_availability() {
