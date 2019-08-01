@@ -46,7 +46,7 @@ abstract class object_file_system extends \file_system_filedir {
 
     public function __construct() {
         global $CFG;
-        parent::__construct(); // Setup fildir.
+        parent::__construct(); // Setup filedir.
 
         $config = get_objectfs_config();
 
@@ -379,22 +379,24 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool success
      */
     public function xsendfile($contenthash) {
-        global $CFG;
-        require_once($CFG->libdir . "/xsendfilelib.php");
+        $location = $this->get_object_location_from_hash($contenthash);
 
-        $path = $this->get_remote_path_from_hash($contenthash);
+        switch ($location) {
+            case OBJECT_LOCATION_EXTERNAL:
+            case OBJECT_LOCATION_DUPLICATED:
+                $filename = $this->get_filename_from_globals();
 
-        $this->logger->start_timing();
-        $success = xsendfile($path);
-        $this->logger->end_timing();
+                if ($this->externalclient->support_signed_urls()) {
+                    $path = $this->generate_signed_url_to_external_file_from_hash($contenthash, $filename);
+                    redirect($path);
+                }
+                break;
 
-        $this->logger->log_object_read('xsendfile', $path);
-
-        if (!$success) {
-            update_object_record($contenthash, OBJECT_LOCATION_ERROR);
+            case OBJECT_LOCATION_LOCAL:
+            case OBJECT_LOCATION_ERROR:
+            default:
+                return false;
         }
-
-        return $success;
     }
 
     /**
@@ -664,20 +666,22 @@ abstract class object_file_system extends \file_system_filedir {
     /**
      * Generates signed URL to external file from its hash.
      *
-     * @param string $contenthash File content hash.
+     * @param string $contenthash file content hash.
      *
      * @return string.
      */
-
-    public function generate_signed_url_to_external_file_from_hash($contenthash) {
-
-        if ($this->externalclient->support_signed_urls()) {
-            $signedurl = $this->externalclient->generate_signed_url($contenthash);
-        } else {
-            $signedurl = 'Pre-Signed URLs not supported for current storage';
-        }
-
-        return $signedurl;
+    public function generate_signed_url_to_external_file_from_hash($contenthash, $filename) {
+        return $this->externalclient->generate_signed_url($contenthash, $filename);
     }
 
+    /**
+     * Returns file name from globals variable.
+     *
+     * @return string.
+     */
+    public function get_filename_from_globals() {
+        $pos = strrpos($GLOBALS['ME'], '/');
+        $filename = substr($GLOBALS['ME'], $pos+1);
+        return $filename;
+    }
 }

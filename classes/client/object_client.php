@@ -51,10 +51,10 @@ class object_client {
      *
      * @param string $contenthash File content hash.
      *
-     * @return string.
+     * @throws \coding_exception
      */
-    public function generate_signed_url($contenthash) {
-        return 'Not supported';
+    public function generate_signed_url($contenthash, $filename) {
+        throw new \coding_exception("Pre-signed URLs not supported");
     }
 
 }
