@@ -40,7 +40,6 @@ use Aws\S3\MultipartUploader;
 use Aws\S3\ObjectUploader;
 use Aws\S3\S3Client;
 use Aws\S3\Exception\S3Exception;
-use Aws\Middleware;
 
 define('AWS_API_VERSION', '2006-03-01');
 
@@ -82,18 +81,17 @@ class s3_client extends object_client {
      * Generates pre-signed URL to S3 file from its hash.
      *
      * @param string $contenthash file content hash.
-     *
-     * @param string $filename file name.
+     * @param array $headers request headers.
      *
      * @return string.
      */
-    public function generate_signed_url($contenthash, $filename) {
+    public function generate_presigned_url($contenthash, $headers) {
         $key = $this->get_filepath_from_hash($contenthash);
-        $command = $this->client->getCommand('GetObject', [
-            'Bucket' => $this->bucket,
-            'Key' => $key,
-            'ResponseContentDisposition' => 'attachment;filename="'.$filename.'"',
-        ]);
+        $params = array('Bucket' => $this->bucket, 'Key' => $key,);
+        if ($this->content_disposition_exists_in_headers($headers)) {
+            $params['ResponseContentDisposition'] = $this->get_content_disposition_header($headers);
+        }
+        $command = $this->client->getCommand('GetObject', $params);
         $request = $this->client->createPresignedRequest($command, '+30 minutes');
         $signedurl = (string)$request->getUri();
 
@@ -105,7 +103,7 @@ class s3_client extends object_client {
      *
      * @return bool.
      */
-    public function support_signed_urls() {
+    public function support_presigned_urls() {
         return true;
     }
 

@@ -28,6 +28,7 @@
 
 namespace tool_objectfs;
 
+use core\session\exception;
 use stored_file;
 use file_storage;
 use BlobRestProxy;
@@ -379,16 +380,31 @@ abstract class object_file_system extends \file_system_filedir {
      * @return bool success
      */
     public function xsendfile($contenthash) {
-        $location = $this->get_object_location_from_hash($contenthash);
+        // As we don't use xsendfile functionality anymore,
+        // use this method to redirect to pre-signed URL.
+        return $this->redirect_to_presigned_url($contenthash);
+    }
 
+    /**
+     * Redirect to pre-signed URL to download file directly from external storage.
+     * Return false if file is local or external storage doesn't support pre-signed URLs.
+     *
+     * @param string $contenthash The content hash of the file to be served
+     * @return bool
+     */
+
+    public function redirect_to_presigned_url($contenthash) {
+        $location = $this->get_object_location_from_hash($contenthash);
         switch ($location) {
             case OBJECT_LOCATION_EXTERNAL:
             case OBJECT_LOCATION_DUPLICATED:
-                $filename = $this->get_filename_from_globals();
-
-                if ($this->externalclient->support_signed_urls()) {
-                    $path = $this->generate_signed_url_to_external_file_from_hash($contenthash, $filename);
-                    redirect($path);
+                if ($this->externalclient->support_presigned_urls()) {
+                    $path = $this->generate_presigned_url_to_external_file($contenthash, headers_list());
+                    try {
+                        redirect($path);
+                    } catch (\Exception $e) {
+                        return false;
+                    }
                 }
                 break;
 
@@ -397,6 +413,8 @@ abstract class object_file_system extends \file_system_filedir {
             default:
                 return false;
         }
+
+        return false;
     }
 
     /**
@@ -664,24 +682,15 @@ abstract class object_file_system extends \file_system_filedir {
     }
 
     /**
-     * Generates signed URL to external file from its hash.
+     * Generates pre-signed URL to external file.
      *
      * @param string $contenthash file content hash.
+     * @param array $headers request headers.
      *
      * @return string.
      */
-    public function generate_signed_url_to_external_file_from_hash($contenthash, $filename) {
-        return $this->externalclient->generate_signed_url($contenthash, $filename);
+    public function generate_presigned_url_to_external_file($contenthash, $headers) {
+        return $this->externalclient->generate_presigned_url($contenthash, $headers);
     }
 
-    /**
-     * Returns file name from globals variable.
-     *
-     * @return string.
-     */
-    public function get_filename_from_globals() {
-        $pos = strrpos($GLOBALS['ME'], '/');
-        $filename = substr($GLOBALS['ME'], $pos+1);
-        return $filename;
-    }
 }

@@ -42,7 +42,7 @@ class object_client {
      *
      * @return bool.
      */
-    public function support_signed_urls() {
+    public function support_presigned_urls() {
         return false;
     }
 
@@ -50,11 +50,49 @@ class object_client {
      * Generates pre-signed URL to storage file from its hash.
      *
      * @param string $contenthash File content hash.
+     * @param array $headers request headers.
      *
      * @throws \coding_exception
      */
-    public function generate_signed_url($contenthash, $filename) {
+    public function generate_presigned_url($contenthash, $headers) {
         throw new \coding_exception("Pre-signed URLs not supported");
+    }
+
+    /**
+     * Checks that Content-Disposition represented in headers.
+     *
+     * @param array $headers request headers.
+     *
+     * @return bool
+     */
+    public function content_disposition_exists_in_headers($headers) {
+        foreach ($headers as $header) {
+            $found = strpos($header, 'Content-Disposition');
+
+            if ($found !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns Content-Disposition header from headers.
+     *
+     * @param array $headers request headers.
+     *
+     * @return string file name.
+     * @throws \coding_exception
+     */
+    public function get_content_disposition_header($headers) {
+        foreach ($headers as $header) {
+            $found = strpos($header, 'Content-Disposition');
+
+            if ($found !== false) {
+                return substr($header, 21);
+            }
+        }
+        throw new \coding_exception("Couldn't find Content-Disposition in headers");
     }
 
 }
