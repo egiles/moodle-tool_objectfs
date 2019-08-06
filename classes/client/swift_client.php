@@ -263,39 +263,6 @@ class swift_client extends object_client {
     }
 
     /**
-     * Moodle form element to display connection details for the swift service.
-     *
-     * @param $mform
-     * @param $config
-     * @return mixed
-     */
-    public function define_swift_check($mform, $config) {
-        global $OUTPUT;
-
-        $client = new swift_client($config, false);
-        $connection = $client->test_connection();
-
-        if ($connection->success) {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
-
-            // Check permissions if we can connect.
-            $permissions = $client->test_permissions();
-            if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification(key($permissions->messages), current($permissions->messages)));
-            } else {
-                foreach ($permissions->messages as $message => $type) {
-                    $mform->addElement('html', $OUTPUT->notification($message, $type));
-                }
-            }
-
-        } else {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
-            $permissions = true;
-        }
-        return $mform;
-    }
-
-    /**
      * swift settings form with the following elements:
      *
      * @param $mform
@@ -307,7 +274,8 @@ class swift_client extends object_client {
         $mform->addElement('header', 'openstackheader', get_string('settings:openstack:header', 'tool_objectfs'));
         $mform->setExpanded('openstackheader');
 
-        $mform = $this->define_swift_check($mform, $config);
+        $client = new swift_client($config);
+        $mform = $this->define_client_check($mform, $client);
 
         $mform->addElement('text', 'openstack_username', get_string('settings:openstack:username', 'tool_objectfs'));
         $mform->addHelpButton('openstack_username', 'settings:openstack:username', 'tool_objectfs');
@@ -352,4 +320,18 @@ class swift_client extends object_client {
         return $e->getResponse()->getStatusCode();
     }
 
+    public function delete_file($fullpath)
+    {
+        // TODO: Implement delete_file() method.
+    }
+
+    public function rename_file($currentpath, $destinationpath)
+    {
+        // TODO: Implement rename_file() method.
+    }
+
+    public function get_trash_fullpath_from_hash($contenthash)
+    {
+        // TODO: Implement get_trash_fullpath_from_hash() method.
+    }
 }

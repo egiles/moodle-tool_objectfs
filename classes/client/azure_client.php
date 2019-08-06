@@ -320,38 +320,6 @@ class azure_client extends object_client {
     }
 
     /**
-     * Moodle form element to display connection details for the Azure service.
-     *
-     * @param $mform
-     * @param $config
-     * @return mixed
-     */
-    public function define_azure_check($mform, $config) {
-        global $OUTPUT;
-
-        $client = new azure_client($config);
-        $connection = $client->test_connection();
-
-        if ($connection->success) {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
-
-            // Check permissions if we can connect.
-            $permissions = $client->test_permissions();
-            if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification(key($permissions->messages), current($permissions->messages)));
-            } else {
-                foreach ($permissions->messages as $message => $type) {
-                    $mform->addElement('html', $OUTPUT->notification($message, $type));
-                }
-            }
-
-        } else {
-            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
-        }
-        return $mform;
-    }
-
-    /**
      * Azure settings form with the following elements:
      *
      * Storage account name.
@@ -367,7 +335,8 @@ class azure_client extends object_client {
         $mform->addElement('header', 'azureheader', get_string('settings:azure:header', 'tool_objectfs'));
         $mform->setExpanded('azureheader');
 
-        $mform = $this->define_azure_check($mform, $config);
+        $client = new azure_client($config);
+        $mform = $this->define_client_check($mform, $client);
 
         $mform->addElement('text', 'azure_accountname', get_string('settings:azure:accountname', 'tool_objectfs'));
         $mform->addHelpButton('azure_accountname', 'settings:azure:accountname', 'tool_objectfs');

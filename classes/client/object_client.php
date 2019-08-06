@@ -108,4 +108,34 @@ abstract class object_client implements client_interface {
         throw new \coding_exception("Couldn't find Content-Disposition in headers");
     }
 
+    /**
+     * Moodle form element to display connection details for the client service.
+     *
+     * @param $mform
+     * @param $client
+     * @return mixed
+     */
+    public function define_client_check($mform, $client) {
+        global $OUTPUT;
+        $connection = $client->test_connection();
+
+        if ($connection->success) {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifysuccess'));
+
+            // Check permissions if we can connect.
+            $permissions = $client->test_permissions();
+            if ($permissions->success) {
+                $mform->addElement('html', $OUTPUT->notification(key($permissions->messages), current($permissions->messages)));
+            } else {
+                foreach ($permissions->messages as $message => $type) {
+                    $mform->addElement('html', $OUTPUT->notification($message, $type));
+                }
+            }
+        } else {
+            $mform->addElement('html', $OUTPUT->notification($connection->message, 'notifyproblem'));
+        }
+        return $mform;
+    }
+
+
 }
