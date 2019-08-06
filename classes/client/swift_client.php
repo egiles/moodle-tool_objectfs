@@ -320,18 +320,15 @@ class swift_client extends object_client {
         return $e->getResponse()->getStatusCode();
     }
 
-    public function delete_file($fullpath)
-    {
+    public function delete_file($fullpath) {
         // TODO: Implement delete_file() method.
     }
 
-    public function rename_file($currentpath, $destinationpath)
-    {
+    public function rename_file($currentpath, $destinationpath) {
         // TODO: Implement rename_file() method.
     }
 
-    public function get_trash_fullpath_from_hash($contenthash)
-    {
+    public function get_trash_fullpath_from_hash($contenthash) {
         // TODO: Implement get_trash_fullpath_from_hash() method.
     }
 }
