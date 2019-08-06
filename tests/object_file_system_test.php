@@ -514,7 +514,11 @@ class object_file_system_testcase extends tool_objectfs_testcase {
         $this->filesystem = new test_file_system();
         $file = $this->create_remote_file();
         $filehash = $file->get_contenthash();
-        $signedurl = $this->filesystem->generate_signed_url_to_external_file_from_hash($filehash);
-        var_dump($signedurl);
+        try {
+            $signedurl = $this->filesystem->generate_presigned_url_to_external_file($filehash);
+            $this->assertTrue($this->is_externally_readable_by_url($signedurl));
+        } catch (\coding_exception $e) {
+            $this->assertEquals($e->a, 'Pre-signed URLs not supported');
+        }
     }
 }

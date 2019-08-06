@@ -689,7 +689,7 @@ abstract class object_file_system extends \file_system_filedir {
      *
      * @return string.
      */
-    public function generate_presigned_url_to_external_file($contenthash, $headers) {
+    public function generate_presigned_url_to_external_file($contenthash, $headers = array()) {
         return $this->externalclient->generate_presigned_url($contenthash, $headers);
     }
 

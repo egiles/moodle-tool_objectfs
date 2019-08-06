@@ -63,13 +63,12 @@ $string['settings:enablelogging_help'] = 'Enable or disable file system logging.
 
 $string['settings:generalheader'] = 'General Settings';
 
-$string['settings:clientnotavailable'] = 'The configured client \'{$a}\' is not available. Please install the required dependencies.';
+$string['settings:clientnotavailable'] = 'Client for current file system is not available. Please install the required dependencies.';
 
 $string['settings:clientselection:header'] = 'Storage File System Selection';
 $string['settings:clientselection:title'] = 'Storage File System';
 $string['settings:clientselection:title_help'] = 'The storage file system. This is also the active file system for the background tasks.';
-$string['settings:clientselection:matchfilesystem'] = 'This setting matches $CFG->alternative_file_system_class';
-$string['settings:clientselection:mismatchfilesystem'] = 'This setting does not match $CFG->alternative_file_system_class';
+$string['settings:clientselection:mismatchfilesystem'] = 'This setting should match $CFG->alternative_file_system_class';
 
 $string['settings:aws:header'] = 'Amazon S3 Settings';
 $string['settings:aws:key'] = 'Key';

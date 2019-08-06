@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Object client class.
+ * Object client abstract class.
  *
  * @package   tool_objectfs
  * @author    Kenneth Hendricks <kennethhendricks@catalyst-au.net>
@@ -27,14 +27,27 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-class object_client {
+abstract class object_client implements client_interface {
 
+    public function __construct($config) {
+
+    }
+
+    /**
+     * Returns true if the Client SDK exists and has been loaded.
+     *
+     * @return bool
+     */
     public function get_availability() {
-        return false;
+        if (file_exists($this->autoloader)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function register_stream_wrapper() {
-        return false;
+
     }
 
     /**

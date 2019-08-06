@@ -27,14 +27,6 @@ namespace tool_objectfs\client;
 
 defined('MOODLE_INTERNAL') || die();
 
-$autoloader = $CFG->dirroot . '/local/azure_storage/vendor/autoload.php';
-
-if (!file_exists($autoloader)) {
-    return;
-}
-
-require_once($autoloader);
-
 use GuzzleHttp\Exception\ConnectException;
 use MicrosoftAzure\Storage\Blob\BlobRestProxy;
 use MicrosoftAzure\Storage\Common\Internal\Resources;
@@ -52,23 +44,24 @@ class azure_client extends object_client {
     /** @var string $container The current container. */
     protected $container;
 
+    protected $autoloader;
+
     /**
      * The azure_client constructor.
      *
      * @param $config
      */
     public function __construct($config) {
-        $this->container = $config->azure_container;
-        $this->set_client($config);
-    }
+        global $CFG;
+        $this->autoloader = $CFG->dirroot . '/local/azure_storage/vendor/autoload.php';
 
-    /**
-     * Returns true if the Azure Storage SDK exists and has been loaded.
-     *
-     * @return bool
-     */
-    public function get_availability() {
-        return true;
+        if ($this->get_availability() && !empty($config)) {
+            require_once($this->autoloader);
+            $this->container = $config->azure_container;
+            $this->set_client($config);
+        } else {
+            parent::__construct($config);
+        }
     }
 
     /**
@@ -109,7 +102,11 @@ class azure_client extends object_client {
      * Sets the StreamWrapper to allow accessing the remote content via a blob:// path.
      */
     public function register_stream_wrapper() {
-        StreamWrapper::register($this->client);
+        if ($this->get_availability()) {
+            StreamWrapper::register($this->client);
+        } else {
+            parent::register_stream_wrapper();
+        }
     }
 
     /**
@@ -261,7 +258,7 @@ class azure_client extends object_client {
             $result = $this->client->createBlockBlob($this->container, 'permissions_check_file', 'permissions_check_file');
         } catch (ServiceException $e) {
             $details = $this->get_exception_details($e);
-            $permissions->messages[] = get_string('settings:writefailure', 'tool_objectfs') . $details;
+            $permissions->messages[get_string('settings:writefailure', 'tool_objectfs') . $details] = 'notifyproblem';
             $permissions->success = false;
         }
 
@@ -273,14 +270,14 @@ class azure_client extends object_client {
             // Write could have failed.
             if ($errorcode !== 'BlobNotFound') {
                 $details = $this->get_exception_details($e);
-                $permissions->messages[] = get_string('settings:readfailure', 'tool_objectfs') . $details;
+                $permissions->messages[get_string('settings:readfailure', 'tool_objectfs') . $details] = 'notifyproblem';
                 $permissions->success = false;
             }
         }
 
         try {
             $result = $this->client->deleteBlob($this->container, 'permissions_check_file');
-            $permissions->messages[] = get_string('settings:deletesuccess', 'tool_objectfs');
+            $permissions->messages[get_string('settings:deletesuccess', 'tool_objectfs')] = 'warning';
             $permissions->success = false;
         } catch (ServiceException $e) {
             $errorcode = $this->get_body_error_code($e);
@@ -288,13 +285,13 @@ class azure_client extends object_client {
             // Something else went wrong.
             if ($errorcode !== 'AuthorizationPermissionMismatch') {
                 $details = $this->get_exception_details($e);
-                $permissions->messages[] = get_string('settings:deleteerror', 'tool_objectfs') . $details;
+                $permissions->messages[get_string('settings:deleteerror', 'tool_objectfs') . $details] = 'notifyproblem';
                 $permissions->success = false;
             }
         }
 
         if ($permissions->success) {
-            $permissions->messages[] = get_string('settings:permissioncheckpassed', 'tool_objectfs');
+            $permissions->messages[get_string('settings:permissioncheckpassed', 'tool_objectfs')] = 'notifysuccess';
         }
 
         return $permissions;
@@ -341,10 +338,10 @@ class azure_client extends object_client {
             // Check permissions if we can connect.
             $permissions = $client->test_permissions();
             if ($permissions->success) {
-                $mform->addElement('html', $OUTPUT->notification($permissions->messages[0], 'notifysuccess'));
+                $mform->addElement('html', $OUTPUT->notification(key($permissions->messages), current($permissions->messages)));
             } else {
-                foreach ($permissions->messages as $message) {
-                    $mform->addElement('html', $OUTPUT->notification($message, 'notifyproblem'));
+                foreach ($permissions->messages as $message => $type) {
+                    $mform->addElement('html', $OUTPUT->notification($message, $type));
                 }
             }
 
