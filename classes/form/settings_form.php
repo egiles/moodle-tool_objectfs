@@ -150,13 +150,17 @@ class settings_form extends \moodleform {
         $names = tool_objectfs_get_client_components('file_system');
         $clientlist = array_combine($names, $names);
 
-        $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $clientlist);
-        $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
+        if (isset($CFG->alternative_file_system_class)) {
+            $mform->addElement('select', 'filesystem', get_string('settings:clientselection:title', 'tool_objectfs'), $clientlist);
+            $mform->addHelpButton('filesystem', 'settings:clientselection:title', 'tool_objectfs');
 
-        if (isset($CFG->alternative_file_system_class) && $CFG->alternative_file_system_class == $config->filesystem) {
-            $this->matchfilesystem = true;
+            if ($CFG->alternative_file_system_class == $config->filesystem) {
+                $this->matchfilesystem = true;
+            } else {
+                $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs'), 'notifyproblem'));
+            }
         } else {
-            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:mismatchfilesystem', 'tool_objectfs'), 'notifyproblem'));
+            $mform->addElement('html', $OUTPUT->notification(get_string('settings:clientselection:filesystemnotdefined', 'tool_objectfs'), 'warning'));
         }
 
         return $mform;
